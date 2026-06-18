@@ -1,7 +1,33 @@
 package main
 
-import "fmt"
+import (
+	"encoding/json"
+	"log"
+	"net/http"
+)
+
+type HealthResponse struct {
+	Status string `json:"status"`
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	response := HealthResponse{
+		Status: "ok",
+	}
+
+	json.NewEncoder(w).Encode(response)
+}
 
 func main() {
-	fmt.Println("Hello, World")
+	http.HandleFunc("/health", healthHandler)
+
+	port := ":8080"
+	log.Printf("Server starting on port %s", port)
+
+	if err := http.ListenAndServe(port, nil); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
 }
